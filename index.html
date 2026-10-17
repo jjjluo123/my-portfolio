@@ -1,3 +1,4 @@
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -32,7 +33,6 @@
                     }
                 });
 
-                // 核心修改：使用自然排序，不管文件名多乱，带数字的都会按1、2、3...15的顺序排好
                 allFiles.sort((a, b) => {
                     return new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}).compare(a.name, b.name);
                 });
@@ -40,13 +40,11 @@
                 allFiles.forEach(file => {
                     const img = document.createElement('img');
                     
-                    // 核心修改：把 GitHub 的图片链接换成国内手机能访问的 jsDelivr 免费加速通道
-                    let url = file.download_url;
-                    if (url.includes('raw.githubusercontent.com')) {
-                        url = url.replace('raw.githubusercontent.com', 'cdn.jsdelivr.net/gh').replace('/master/', '@master/');
-                    }
+                    // 【终极修改】使用极其稳定的 wsrv.nl 图片代理，无视中文文件名，国内秒开
+                    let rawUrl = file.download_url; 
+                    let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(rawUrl);
                     
-                    img.src = url;
+                    img.src = proxyUrl;
                     img.loading = "lazy"; 
                     gallery.appendChild(img);
                 });
