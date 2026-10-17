@@ -1,0 +1,38 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>我的作品集</title>
+    <style>
+        body { background: #f5f5f5; font-family: sans-serif; text-align: center; padding: 20px; }
+        .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .gallery img { max-width: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <h1>我的作品集</h1>
+    <div class="gallery" id="gallery"></div>
+    <script>
+        const repo = 'jjjluo123/my-portfolio';
+        const urls = [`https://api.github.com/repos/${repo}/contents/`, `https://api.github.com/repos/${repo}/contents/gallery`];
+        
+        Promise.all(urls.map(url => fetch(url).then(res => res.json())))
+            .then(results => {
+                const gallery = document.getElementById('gallery');
+                results.forEach(data => {
+                    if (Array.isArray(data)) {
+                        data.forEach(file => {
+                            if (file.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(file.name)) {
+                                const img = document.createElement('img');
+                                img.src = file.download_url;
+                                gallery.appendChild(img);
+                            }
+                        });
+                    }
+                });
+            });
+    </script>
+</body>
+</html>
+```
