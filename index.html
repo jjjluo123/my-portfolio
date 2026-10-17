@@ -1,4 +1,3 @@
-
 ```html
 <!DOCTYPE html>
 <html>
@@ -40,9 +39,9 @@
                 allFiles.forEach(file => {
                     const img = document.createElement('img');
                     
-                    // 【终极修改】使用极其稳定的 wsrv.nl 图片代理，无视中文文件名，国内秒开
                     let rawUrl = file.download_url; 
-                    let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(rawUrl);
+                    // 【终极修改】加了图片压缩参数：宽度限制1000，质量80%，输出webp格式
+                    let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(rawUrl) + '&w=1000&q=80&output=webp';
                     
                     img.src = proxyUrl;
                     img.loading = "lazy"; 
