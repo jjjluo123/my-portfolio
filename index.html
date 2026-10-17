@@ -1,17 +1,19 @@
+
 ```html
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的作品集</title>
     <style>
-        body { background: #f5f5f5; font-family: sans-serif; text-align: center; padding: 20px; }
-        .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-        .gallery img { max-width: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        body { background: #f5f5f5; font-family: sans-serif; padding: 20px; margin: 0; }
+        /* 关键1：让它从上往下排成一条长线 */
+        .gallery { display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 800px; margin: 0 auto; }
+        .gallery img { width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <h1>我的作品集</h1>
     <div class="gallery" id="gallery"></div>
     <script>
         const repo = 'jjjluo123/my-portfolio';
@@ -20,16 +22,33 @@
         Promise.all(urls.map(url => fetch(url).then(res => res.json())))
             .then(results => {
                 const gallery = document.getElementById('gallery');
+                let allFiles = [];
+                
                 results.forEach(data => {
                     if (Array.isArray(data)) {
                         data.forEach(file => {
                             if (file.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(file.name)) {
-                                const img = document.createElement('img');
-                                img.src = file.download_url;
-                                gallery.appendChild(img);
+                                allFiles.push(file);
                             }
                         });
                     }
+                });
+
+                // 关键2：提取文件名里的数字进行排序，保证 1,2...31 顺序正确
+                allFiles.sort((a, b) => {
+                    const numA = a.name.match(/\d+/g);
+                    const numB = b.name.match(/\d+/g);
+                    if (numA && numB) {
+                        return parseInt(numA[numA.length - 1]) - parseInt(numB[numB.length - 1]);
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+
+                allFiles.forEach(file => {
+                    const img = document.createElement('img');
+                    img.src = file.download_url;
+                    img.loading = "lazy"; 
+                    gallery.appendChild(img);
                 });
             });
     </script>
