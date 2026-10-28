@@ -6,6 +6,7 @@
     <title>我的作品集</title>
     <style>
         body { background: #f5f5f5; font-family: sans-serif; padding: 20px; margin: 0; }
+        /* 长条垂直排版 */
         .gallery { display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 800px; margin: 0 auto; }
         .gallery img { width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     </style>
@@ -14,36 +15,32 @@
     <div class="gallery" id="gallery"></div>
     <script>
         const repo = 'jjjluo123/my-portfolio';
-        const urls = [`https://api.github.com/repos/${repo}/contents/`, `https://api.github.com/repos/${repo}/contents/gallery`];
+        // 只抓取 photos 文件夹里的图片
+        const url = `https://api.github.com/repos/${repo}/contents/photos`;
         
-        Promise.all(urls.map(url => fetch(url).then(res => res.json())))
-            .then(results => {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
                 const gallery = document.getElementById('gallery');
-                let allFiles = [];
+                if (!Array.isArray(data)) return;
                 
-                results.forEach(data => {
-                    if (Array.isArray(data)) {
-                        data.forEach(file => {
-                            if (file.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(file.name)) {
-                                allFiles.push(file);
-                            }
-                        });
-                    }
-                });
+                // 筛选出图片文件
+                let allFiles = data.filter(file => file.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(file.name));
 
+                // 自然排序，支持 1, 2, 3...10, 11 这样的顺序
                 allFiles.sort((a, b) => {
                     return new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}).compare(a.name, b.name);
                 });
 
                 allFiles.forEach(file => {
                     const img = document.createElement('img');
-                    
                     let rawUrl = file.download_url; 
-                    // 【终极修改】加了图片压缩参数：宽度限制1000，质量80%，输出webp格式
+                    
+                    // 使用 wsrv.nl 加速通道，自动压缩图片为手机适配尺寸，解决国内加载慢/空白问题
                     let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(rawUrl) + '&w=1000&q=80&output=webp';
                     
                     img.src = proxyUrl;
-                    img.loading = "lazy"; 
+                    img.loading = "lazy"; // 懒加载，滑到哪里加载哪里，50张图也不卡
                     gallery.appendChild(img);
                 });
             });
